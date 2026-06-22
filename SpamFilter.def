@@ -1,0 +1,4 @@
+LIBRARY      "SPAMFILTER"
+  DESCRIPTION  'MailEnable SMTP junk-mail marking plugin (SPF/DKIM/DMARC + SpamAssassin)'
+EXPORTS
+  Execute      @1
