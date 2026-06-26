@@ -42,6 +42,7 @@ static double g_spamThreshold    = 5.0;
 static bool   g_useSA            = true;     // call SpamAssassin at all
 static bool   g_enforceDmarc     = true;     // tag DMARC fails under p=quarantine/reject
 static bool   g_skipAuthenticated= true;     // skip authenticated submissions (your users)
+static bool   g_junkHeader       = true;     // inject X-ME-Content: Deliver-To=Junk when tagged
 static string g_authServId       = "mail.local";
 static int    g_timeoutMs        = 10000;
 static bool   g_debug            = false;
@@ -437,6 +438,7 @@ static void EnsureInit(){
         g_enforceDmarc      = GetPrivateProfileIntA("SpamFilter","EnforceDmarc",1,ini.c_str())!=0;
         g_skipAuthenticated = GetPrivateProfileIntA("SpamFilter","SkipAuthenticated",1,ini.c_str())!=0;
         GetPrivateProfileStringA("SpamFilter","AuthServId","mail.local",buf,sizeof(buf),ini.c_str()); g_authServId=buf;
+        g_junkHeader = GetPrivateProfileIntA("SpamFilter","DeliverToJunkHeader",1,ini.c_str())!=0;
         g_timeoutMs = GetPrivateProfileIntA("SpamFilter","TimeoutMs",10000,ini.c_str());
         g_debug     = GetPrivateProfileIntA("SpamFilter","Debug",0,ini.c_str())!=0;
         GetPrivateProfileStringA("SpamFilter","DebugLog","",buf,sizeof(buf),ini.c_str()); g_debugLog=buf;
@@ -563,6 +565,7 @@ extern "C" long Execute(char *Configuration, char *Response){
         for(size_t i=0;i<reasons.size();++i){ if(i) reasonStr+=", "; reasonStr+=reasons[i]; }
         headers += "X-Spam-Flag: YES\r\n";
         headers += "X-Spam-Reason: "+reasonStr+"\r\n";
+        if(g_junkHeader) headers += "X-ME-Content: Deliver-To=Junk\r\n";   // MailEnable native -> Junk folder
     }
     if(saOk) headers += "X-Spam-Score: "+FmtScore(score)+"\r\n";
     {

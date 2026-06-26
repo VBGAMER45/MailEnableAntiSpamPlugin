@@ -71,14 +71,37 @@ From the **x86 Native Tools Command Prompt for VS** (separate prompt): same comm
    each build (`bin\` for x86, `bin64\` for x64).
 5. Restart the **MailEnable SMTP** connector/service.
 
-## MailEnable filter: route flagged mail to Junk
+## Getting tagged mail into the Junk folder
 
-In the MailEnable Admin program create a message/content filter:
+The plugin only **tags**; something has to move the message. There are two ways.
+
+### Option A — native header (recommended, works on Standard) — DEFAULT
+
+When a message is tagged the plugin injects MailEnable's own routing header:
+
+```
+X-ME-Content: Deliver-To=Junk
+```
+
+MailEnable's delivery agent honours this and drops the message straight into the
+mailbox's **Junk E-Mail** folder — **no content filter required**, so it works on
+**Standard** edition. Controlled by `DeliverToJunkHeader=1` (default on).
+
+You must enable junk delivery on the post office:
+
+1. MailEnable Admin → **Post Offices → [your post office] → Properties**.
+2. On the **Feature Selection** tab, enable the option that delivers messages
+   marked as spam to the **Junk E-Mail** folder. (Exact wording varies by version.)
+3. Make sure the mailbox has a **Junk E-Mail** folder (IMAP/WebMail auto-creates it).
+
+### Option B — content filter (Professional / Enterprise only)
+
+If you prefer to act on `X-Spam-Flag` instead, create a message/content filter:
 
 - **Criteria:** header `X-Spam-Flag` *contains* `YES`
-- **Action:** Move to mailbox folder → `Junk Email`
+- **Action:** Mark as spam (which adds `X-ME-Content: Deliver-To=Junk`)
 
-(The exact UI path varies by MailEnable edition/version — verify on your install.)
+This requires the content-filtering feature that **Standard does not have**.
 
 ## Configuration (`SpamFilter.ini`)
 
@@ -95,6 +118,7 @@ In the MailEnable Admin program create a message/content filter:
 | `KeywordReloadSeconds` | `5` | Min seconds between keyword-file reload checks. |
 | `WhitelistDomains` | *(empty)* | Trusted domains, subdomains included. |
 | `WhitelistSenders` | *(empty)* | Trusted exact addresses. |
+| `DeliverToJunkHeader` | `1` | Inject `X-ME-Content: Deliver-To=Junk` on tagged mail (routes to Junk on Standard). |
 | `AuthServId` | `mail.local` | authserv-id in Authentication-Results (use your hostname). |
 | `TimeoutMs` | `10000` | spamd socket timeout. |
 | `Debug` / `DebugLog` | `0` / *(path)* | One log line per scanned message. |
