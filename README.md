@@ -65,8 +65,11 @@ From the **x86 Native Tools Command Prompt for VS** (separate prompt): same comm
 
    ```
    HKEY_LOCAL_MACHINE\SOFTWARE\Wow6432Node\Mail Enable\Mail Enable\Connectors\SMTP
-       Plugin DLL = SpamFilter.dll          (REG_SZ, filename only)
+       Plugin DLL = SpamFilter.dll          (REG_SZ, filename only)  
    ```
+   
+	Or command line: reg add "HKLM\SOFTWARE\Wow6432Node\Mail Enable\Mail Enable\Connectors\SMTP" /v "Plugin DLL" /t REG_SZ /d "SpamFilter.dll" /f   
+   
 4. Edit `SpamFilter.ini` (see below) and set `KeywordFile` to the correct folder for
    each build (`bin\` for x86, `bin64\` for x64).
 5. Restart the **MailEnable SMTP** connector/service.
